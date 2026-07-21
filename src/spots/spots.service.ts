@@ -90,6 +90,18 @@ export class SpotsService {
   async deleteSpot(userId: number, spotId: number) {
     const spot = await this.spotRepo.findOne({ where: { id: spotId, user: { id: userId } } });
     if (!spot) throw new Error('Spot não encontrado');
+    
+    if (spot.imagePath) {
+      const fullPath = path.resolve('uploads', spot.imagePath);
+      if (fs.existsSync(fullPath)) {
+        try {
+          fs.unlinkSync(fullPath);
+        } catch (err) {
+          console.error('Erro ao deletar imagem:', err);
+        }
+      }
+    }
+  
     return this.spotRepo.remove(spot);
   }
 
