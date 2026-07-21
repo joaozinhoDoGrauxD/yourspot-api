@@ -8,29 +8,33 @@ import { readFileSync } from 'fs';
 import getPass from './aws-sdk';
 
 const pem = './global-bundle.pem'
-const password = getPass() as unknown as string | undefined
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any, // "mysql"
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '3306', 10),
-      username: process.env.DB_USER,
-      password: password,
-      database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-      dropSchema: false,
-      ssl : true,
-      extra: {
-        ssl: {
-          rejectUnauthorized: false,
-           ca: readFileSync(pem).toString(),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () => {
+      const password = await getPass() 
+          return {
+            type: process.env.DB_TYPE as any, 
+            host: process.env.DB_HOST,
+            port: parseInt(process.env.DB_PORT || '3306', 10),
+            username: process.env.DB_USER,
+            password: password,
+            database: process.env.DB_NAME,
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true,
+            dropSchema: false,
+            ssl : true,
+            extra: {
+            ssl: {
+              rejectUnauthorized: false,
+              ca: readFileSync(pem),
         }
       },
-      logging: 'all',
-      logger: 'advanced-console',
+            logging: 'all',
+            logger: 'advanced-console',
+          }
+      }
     }
   ),
     AuthModule,

@@ -1,12 +1,25 @@
-import AWS from 'aws-sdk'
-AWS.config.update({ region: 'sa-east-1' });
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 
-export default async function getPass(){
+const client = new SecretsManagerClient({
+  region: "sa-east-1",
+   credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  }
+});
 
-    const sm = new AWS.SecretsManager()
-    const secretId = process.env.AWS_SECRET_ID  as string
-    const sec = await sm.getSecretValue({ SecretId: secretId }).promise();
-    const password = JSON.parse(sec.SecretString as string).password;
-    return password
+export default async function getPass() {
+  const secretId = process.env.AWS_SECRET_ID as string;
 
+  const command = new GetSecretValueCommand({
+    SecretId: secretId,
+  });
+
+  const response = await client.send(command);
+
+  const secretString = response.SecretString as string;
+  const password = JSON.parse(secretString).password;
+
+  console.log(password)
+  return password;
 }
