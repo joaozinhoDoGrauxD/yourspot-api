@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Spot } from '../spots/spot.entity';
 import { Contact } from '../contacts/contact.entity';
+import { Report } from '../reports/report.entity';
 
 @Entity('users')
 export class User {
@@ -13,9 +13,9 @@ export class User {
   @Column()
   password!: string;
 
-  @OneToMany(() => Spot, (spot) => spot.user)
-  spots!: Spot[];
-
   @OneToMany(() => Contact, (contact) => contact.user)
   contacts!: Contact[];
+
+  @OneToMany(() => Report, (report) => report.user)
+  reports!: Report[];
 }
